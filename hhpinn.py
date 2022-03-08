@@ -41,13 +41,25 @@ class PhysicsInformedHHModel:
         return loss
 
     def customDerivative (self, x, t):
-        return 0
+        x_dt = []
+        x = x.tolist()
+        t = t.tolist()
+        for i in range(len(x) - 1):
+            x_dt.append([(x[i][0]-x[i+1][0])/(t[i][0]-t[i+1][0])])
+        x_dt.append([(x[-1][0]-x[-2][0])/(t[-1][0]-t[-2][0])])
+        return x_dt
     
     def costFunction (self, V_pred_norm, h_pred, n_pred, m_pred, time):
-        V_pred_norm[0] = 0
-        print(V_pred_norm, h_pred, n_pred, m_pred, time)
-        print(len(time))
-        exit()
+        # print(V_pred_norm, h_pred, n_pred, m_pred, time)
+
+        for i in range(len(time)):
+            V_pred_norm[i] = V[i]
+            h_pred[i] = h[i]
+            n_pred[i] = n[i]
+            m_pred[i] = m[i]
+
+        print(V_pred_norm)
+            
         gNa = 120
         eNa = 115
         gK = 36  
@@ -69,10 +81,20 @@ class PhysicsInformedHHModel:
         
         betaH = 1.0/(torch.exp(3.0-0.1*(V_pred+65))+1)
 
-        V_pred_dt = utilities.get_derivative(V_pred, time, 1)
-        h_pred_dt = utilities.get_derivative(h_pred, time, 1)
-        m_pred_dt = utilities.get_derivative(m_pred, time, 1)
-        n_pred_dt = utilities.get_derivative(n_pred, time, 1)
+        # V_pred_dt = utilities.get_derivative(V_pred, time, 1)
+        # h_pred_dt = utilities.get_derivative(h_pred, time, 1)
+        # m_pred_dt = utilities.get_derivative(m_pred, time, 1)
+        # n_pred_dt = utilities.get_derivative(n_pred, time, 1)
+
+        V_pred_dt = torch.tensor(self.customDerivative(V_pred, time))
+        h_pred_dt = torch.tensor(self.customDerivative(h_pred, time))
+        n_pred_dt = torch.tensor(self.customDerivative(n_pred, time))
+        m_pred_dt = torch.tensor(self.customDerivative(m_pred, time))
+
+        # print(V_pred_dt)
+        # print(self.customDerivative(V_pred, time))
+        # for i in range(len(V_pred_dt)):
+        print(V_pred_dt)    
 
         I = 10
         V_init = -65
@@ -96,12 +118,30 @@ class PhysicsInformedHHModel:
                         (alphaH * (1 - h_pred) - \
                          betaH * h_pred)) ** 2)).view(1)
 
+        e1 = torch.sum((V_pred_dt - \
+                        ((gK * (n_pred ** 4) * (eK - (V_pred + 65))) + \
+                        (gNa * (m_pred ** 3) * h_pred * (eNa - (V_pred + 65))) + \
+                        (gL * (eL - (V_pred + 65))) + \
+                         I)) ** 2).view(1)
+        e2 = torch.sum((m_pred_dt - \
+                        (alphaM * (1 - m_pred) - \
+                         betaM * m_pred)) ** 2).view(1)
+        e3 = torch.sum((n_pred_dt - \
+                        (alphaN * (1 - n_pred) - \
+                         betaN * n_pred)) ** 2).view(1)
+        e4 = torch.sum((h_pred_dt - \
+                        (alphaH * (1 - h_pred) - \
+                         betaH * h_pred)) ** 2).view(1)
+        print(e1, e2, e3, e4)
+
         boundary_loss = \
             ((V_pred[0] - V_init) ** 2) + \
             ((m_pred[0] - m_init) ** 2) + \
             ((n_pred[0] - n_init) ** 2) + \
             ((h_pred[0] - h_init) ** 2)         
-               
+
+        print(equation_loss, boundary_loss)
+        exit()
         return equation_loss, boundary_loss
 
     
