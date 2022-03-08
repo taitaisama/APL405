@@ -4,15 +4,47 @@ import matplotlib.pyplot as plt
 import utilities
 import pickle
 
+def customDerivative (x, t):
+    x_dt = []
+    for i in range(len(x) - 1):
+        x_dt.append([(x[i]-x[i+1])/(t[i]-t[i+1])])
+    x_dt.append([(x[-1]-x[-2])/(t[-1]-t[-2])])
+    return x_dt
 
 infile = open("hhdata.pkl", "rb")
 
 data = pickle.load(infile)
-t = data["time"]
-V = ((np.array(data["Varr"]) + 80)/ 110)
-h = data["harr"]
-n = data["narr"]
-m = data["marr"]
+t_all = data["time"]
+V_all = data["Varr"]
+h_all = data["harr"]
+n_all = data["narr"]
+m_all = data["marr"]
+V_dt_all = customDerivative(V_all, t_all)
+h_dt_all = customDerivative(h_all, t_all)
+n_dt_all = customDerivative(n_all, t_all)
+m_dt_all = customDerivative(m_all, t_all)
+V_all = ((np.array(V_all) + 80)/ 110)
+t = []
+V = []
+h = []
+n = []
+m = []
+V_dt = []
+h_dt = []
+n_dt = []
+m_dt = []
+i = 0
+while i < len(t_all):
+    t.append(t_all[i])
+    V.append(V_all[i])
+    h.append(h_all[i])
+    n.append(n_all[i])
+    m.append(m_all[i])
+    V_dt.append(V_dt_all[i])
+    h_dt.append(h_dt_all[i])
+    n_dt.append(n_dt_all[i])
+    m_dt.append(m_dt_all[i])
+    i = i + int((len(t_all))/1000)
 print(t)
 
 class PhysicsInformedHHModel:
@@ -40,14 +72,7 @@ class PhysicsInformedHHModel:
         loss.backward(retain_graph=True)
         return loss
 
-    def customDerivative (self, x, t):
-        x_dt = []
-        x = x.tolist()
-        t = t.tolist()
-        for i in range(len(x) - 1):
-            x_dt.append([(x[i][0]-x[i+1][0])/(t[i][0]-t[i+1][0])])
-        x_dt.append([(x[-1][0]-x[-2][0])/(t[-1][0]-t[-2][0])])
-        return x_dt
+    
     
     def costFunction (self, V_pred_norm, h_pred, n_pred, m_pred, time):
         # print(V_pred_norm, h_pred, n_pred, m_pred, time)
@@ -86,11 +111,16 @@ class PhysicsInformedHHModel:
         # m_pred_dt = utilities.get_derivative(m_pred, time, 1)
         # n_pred_dt = utilities.get_derivative(n_pred, time, 1)
 
-        V_pred_dt = torch.tensor(self.customDerivative(V_pred, time))
-        h_pred_dt = torch.tensor(self.customDerivative(h_pred, time))
-        n_pred_dt = torch.tensor(self.customDerivative(n_pred, time))
-        m_pred_dt = torch.tensor(self.customDerivative(m_pred, time))
-
+        # V_pred_dt = torch.tensor(self.customDerivative(V_pred, time))
+        # h_pred_dt = torch.tensor(self.customDerivative(h_pred, time))
+        # n_pred_dt = torch.tensor(self.customDerivative(n_pred, time))
+        # m_pred_dt = torch.tensor(self.customDerivative(m_pred, time))
+        V_pred_dt = torch.tensor(V_dt)
+        h_pred_dt = torch.tensor(h_dt)
+        n_pred_dt = torch.tensor(n_dt)
+        m_pred_dt = torch.tensor(m_dt)
+        
+        
         # print(V_pred_dt)
         # print(self.customDerivative(V_pred, time))
         # for i in range(len(V_pred_dt)):
@@ -133,6 +163,12 @@ class PhysicsInformedHHModel:
                         (alphaH * (1 - h_pred) - \
                          betaH * h_pred)) ** 2).view(1)
         print(e1, e2, e3, e4)
+
+        print((V_pred_dt - \
+               ((gK * (n_pred ** 4) * (eK - (V_pred + 65))) + \
+                (gNa * (m_pred ** 3) * h_pred * (eNa - (V_pred + 65))) + \
+                (gL * (eL - (V_pred + 65))) + \
+                I)))
 
         boundary_loss = \
             ((V_pred[0] - V_init) ** 2) + \
