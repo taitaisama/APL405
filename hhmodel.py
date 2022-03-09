@@ -58,7 +58,7 @@ marr = []
 harr = []
 narr = []
 x = []
-for i in range(10000) :
+for i in range(100000) :
     harr.append(h)
     marr.append(m)
     narr.append(n)
