@@ -9,7 +9,7 @@ def step (I, V, m, h, n, t) :
     if (t*1000-int(t*1000) != 0):
         print("enter values upto 4 decimal places")
 
-    dt = 0.01 # resolution
+    dt = 0.001 # resolution
     
     gNa = 120
     eNa = 115
@@ -50,12 +50,6 @@ def betaN(V) :
 def betaH(V) :
     return 1.0/(math.exp(3.0-0.1*(V+65))+1)
 
-print(alphaM(10))
-print(alphaN(10))
-print(alphaH(10))
-print(betaM(10))
-print(betaN(10))
-print(betaH(10))
 
 V = -75
 m = 0.0255
@@ -75,22 +69,9 @@ for i in range(time) :
     narr.append(n)
     Varr.append(V)
     x.append(float(i/100))
-    V, m, h, n = step(I, V, m, h, n, 0.01)
+    V, m, h, n = step(I, V, m, h, n, 0.001)
 l3 = int((time*2)/3)
 
-x_plt = x[0:1464]
-V_plt = Varr[197562:197562+1464]
-m_plt = marr[197562:197562+1464]
-n_plt = narr[197562:197562+1464]
-h_plt = harr[197562:197562+1464]
-plt.plot(x_plt, V_plt)
-plt.show()
-plt.plot(x_plt, m_plt)
-plt.show()
-plt.plot(x_plt, h_plt)
-plt.show()
-plt.plot(x_plt, n_plt)
-plt.show()
 count = 0
 maxi = Varr[l3]
 mini = Varr[l3]
@@ -132,7 +113,21 @@ for i in range(len(hmins)-1):
 for i in range(len(nmins)-1):
     print(nmins[i+1] - nmins[i])
 
-
+lenth = Vmins[-1] - Vmins[-2]
+temp = Vmins[-3]
+x_plt = x[0:lenth]
+V_plt = Varr[temp:temp+lenth]
+m_plt = marr[temp:temp+lenth]
+n_plt = narr[temp:temp+lenth]
+h_plt = harr[temp:temp+lenth]
+plt.plot(x_plt, V_plt)
+plt.show()
+plt.plot(x_plt, m_plt)
+plt.show()
+plt.plot(x_plt, h_plt)
+plt.show()
+plt.plot(x_plt, n_plt)
+plt.show()
 
 
 print(count)
@@ -144,10 +139,10 @@ print(count)
 # file1 = open("Current-Amplitude.txt", "a")
 # file1.write("I = " + str(I) + " max = " + str(maxi) + " min = " + str(mini) + "\n")
 # file1.close()
-# data = {"time": x, "Varr": Varr, "marr": marr, "narr": narr, "harr": harr}
-# outfile = open("hhdata.pkl", "wb")
-# pickle.dump(data, outfile)
-# outfile.close()
+data = {"time": x_plt, "Varr": V_plt, "marr": m_plt, "narr": n_plt, "harr": h_plt}
+outfile = open("hhdata.pkl", "wb")
+pickle.dump(data, outfile)
+outfile.close()
 # for i in range(100):
 #     print(i*2, Varr[i*20], harr[i*20], marr[i*20], narr[i*20])
 #     V_plt.append(Varr[i*20])
