@@ -50,10 +50,17 @@ def betaN(V) :
 def betaH(V) :
     return 1.0/(math.exp(3.0-0.1*(V+65))+1)
 
+print(alphaM(10))
+print(alphaN(10))
+print(alphaH(10))
+print(betaM(10))
+print(betaN(10))
+print(betaH(10))
+
 V = -75
-m = 0.025
-h = 0.07
-n = 0.75
+m = 0.0255
+h = 0.13
+n = 0.68
 
 Varr = []
 marr = []
@@ -61,7 +68,7 @@ harr = []
 narr = []
 x = []
 I = 10
-time = 2000
+time = 200000
 for i in range(time) :
     harr.append(h)
     marr.append(m)
@@ -70,17 +77,27 @@ for i in range(time) :
     x.append(float(i/100))
     V, m, h, n = step(I, V, m, h, n, 0.01)
 l3 = int((time*2)/3)
-plt.plot(x, Varr)
+
+x_plt = x[0:1464]
+V_plt = Varr[197562:197562+1464]
+m_plt = marr[197562:197562+1464]
+n_plt = narr[197562:197562+1464]
+h_plt = harr[197562:197562+1464]
+plt.plot(x_plt, V_plt)
 plt.show()
-plt.plot(x, marr)
+plt.plot(x_plt, m_plt)
 plt.show()
-plt.plot(x, harr)
+plt.plot(x_plt, h_plt)
 plt.show()
-plt.plot(x, narr)
+plt.plot(x_plt, n_plt)
 plt.show()
 count = 0
 maxi = Varr[l3]
 mini = Varr[l3]
+Vmins = []
+mmins = []
+nmins = []
+hmins = []
 for i in range(l3,time-1):
     if (Varr[i] < mini):
         mini = Varr[i]
@@ -88,12 +105,35 @@ for i in range(l3,time-1):
         maxi = Varr[i]
     if (Varr[i-1] > Varr[i] and Varr[i] < Varr[i+1]):
         print("V: ", i)
+        Vmins.append(i)
+        print("    V ", Varr[i])
+        print("    m ", marr[i])
+        print("    n ", narr[i])
+        print("    h ", harr[i])
     if (marr[i-1] > marr[i] and marr[i] < marr[i+1]):
         print("m: ", i)
+        mmins.append(i)
     if (narr[i-1] > narr[i] and narr[i] < narr[i+1]):
         print("n: ", i)
+        nmins.append(i)
     if (harr[i-1] > harr[i] and harr[i] < harr[i+1]):
         print("h: ", i)
+        hmins.append(i)
+
+for i in range(len(Vmins)-1):
+    print(Vmins[i+1] - Vmins[i])
+
+for i in range(len(mmins)-1):
+    print(mmins[i+1] - mmins[i])
+
+for i in range(len(hmins)-1):
+    print(hmins[i+1] - hmins[i])
+
+for i in range(len(nmins)-1):
+    print(nmins[i+1] - nmins[i])
+
+
+
 
 print(count)
 
