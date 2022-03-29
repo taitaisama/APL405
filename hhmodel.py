@@ -61,7 +61,7 @@ marr = []
 harr = []
 narr = []
 x = []
-I = 10
+I = 100
 time = 200000
 for i in range(time) :
     harr.append(h)
@@ -139,10 +139,10 @@ print(count)
 # file1 = open("Current-Amplitude.txt", "a")
 # file1.write("I = " + str(I) + " max = " + str(maxi) + " min = " + str(mini) + "\n")
 # file1.close()
-data = {"time": x_plt, "Varr": V_plt, "marr": m_plt, "narr": n_plt, "harr": h_plt}
-outfile = open("hhdata.pkl", "wb")
-pickle.dump(data, outfile)
-outfile.close()
+# data = {"time": x_plt, "Varr": V_plt, "marr": m_plt, "narr": n_plt, "harr": h_plt}
+# outfile = open("hhdata.pkl", "wb")
+# pickle.dump(data, outfile)
+# outfile.close()
 # for i in range(100):
 #     print(i*2, Varr[i*20], harr[i*20], marr[i*20], narr[i*20])
 #     V_plt.append(Varr[i*20])

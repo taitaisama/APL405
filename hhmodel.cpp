@@ -32,6 +32,14 @@ struct threadArgs {
   std::vector<std::pair<state, double>> &data;
 };
 
+struct threadArgs2 {
+  std::vector<double> &Ivals;
+  std::vector<double> &timeperiods;
+  std::vector<double> &Vmin;
+  std::vector<double> &Vmax;
+};
+
+
 double alphaM (double V) {
   return ((2.5 - 0.1*(V+65)) / (std::exp(2.5 - 0.1*(V+65)) - 1));
 }
@@ -125,7 +133,7 @@ double findI (state initState, double Imin, double Imax){
   return currs[startIdx];
 }
 
-void* computePerThread (void* args){
+void* computePerThread1 (void* args){
   threadArgs x = *((threadArgs*) args);
   for (double V : x.Vvals){
     for (double h = 0; h <= 1; h += hstep){
@@ -145,6 +153,10 @@ void* computePerThread (void* args){
   pthread_exit(NULL);
 }
 
+void* computePerThread2 (void * args){
+  threadArgs2 x = *((threadArgs2*) args);
+}
+
 int main (){
   std::vector<pthread_t> allThreads(NumThreads);
   std::vector<threadArgs> args;
@@ -156,7 +168,7 @@ int main (){
     args.push_back({Vvals[threadnum], data[threadnum]});
   }
   for (std::size_t threadnum = 0; threadnum < NumThreads; threadnum ++){
-    int t = pthread_create(&allThreads[threadnum], NULL, computePerThread, (void*)(&args[threadnum]));
+    int t = pthread_create(&allThreads[threadnum], NULL, computePerThread1, (void*)(&args[threadnum]));
   }
   for (unsigned int thread = 0; thread < NumThreads; thread ++){
     int t = pthread_join(allThreads[thread], NULL);

@@ -113,11 +113,60 @@ print(next_hidden)
 
 costFunction = nn.MSELoss()
 
-# def train (current, voltages):
+learning_rate = 0.005
 
-#     hidden = lrn.initHidden()
+def train (currents, voltages):
 
-#     lrn.zero_grad()
+    hidden = lrn.initHidden()
 
-#     for i in range(voltages):
-#         output, hidden = run(
+    lrn.zero_grad()
+
+    for i in range(len(currents)):
+        output, hidden = lrn(currents[i], hidden)
+
+    loss = costFunction(output, voltages)
+    loss.backward();
+
+    for p in lrn.parameters():
+        p.data.add_(p.grad.data, alpha=-learning_rate)
+
+    return output, loss.item()
+
+
+import time
+import math
+
+n_iters = 100000
+print_every = 5000
+plot_every = 1000
+
+
+
+# Keep track of losses for plotting
+current_loss = 0
+all_losses = []
+
+def timeSince(since):
+    now = time.time()
+    s = now - since
+    m = math.floor(s / 60)
+    s -= m * 60
+    return '%dm %ds' % (m, s)
+
+start = time.time()
+
+for iter in range(1, n_iters + 1):
+    category, line, category_tensor, line_tensor = randomTrainingExample()
+    output, loss = train(category_tensor, line_tensor)
+    current_loss += loss
+
+    # Print iter number, loss, name and guess
+    if iter % print_every == 0:
+        guess, guess_i = categoryFromOutput(output)
+        print('%d %d%% (%s) %.4f %s / %s %s' % (iter, iter / n_iters * 100, timeSince(start), loss, line, guess, correct))
+
+    # Add current loss avg to list of losses
+    if iter % plot_every == 0:
+        all_losses.append(current_loss / plot_every)
+        current_loss = 0
+
